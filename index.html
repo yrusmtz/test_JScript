@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio en JS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container mt-3">
+        <div class="row justify-content-center">
+            <div class="row">
+                <div class="col-8">
+                    <h1>Ejercicio en JavaScript</h1>
+                </div>
+                <div class="col-4 text-end pt-3"><span class="text-muted">[ Sury Martinez ]</span></div>
+            </div>
+            <hr>
+            <div class="row mt-3">
+                <div class="col-4">
+                    <div class="form-group mb-2">
+                        <label for="inferiorLimitInput">Límite inferior</label>
+                        <input type="number" class="form-control" id="inferiorLimitInput" placeholder="Ingrese un número" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="superiorLimitInput">Límite superior</label>
+                        <input type="number" class="form-control" id="superiorLimitInput" placeholder="Ingrese un número" min="1">
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="form-group">
+                        <button class="btn btn-secondary mt-4" onclick="generateNumbers()">Botón generar</button>
+                    </div>
+                    <div class="form-group pt-2">
+                        <button class="btn btn-secondary mt-4" onclick="clearAll()">Botón Limpiar</button>
+                    </div
+                </div>
+            </div>
+            <div class="row mt-5">
+                <div class="col-5">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th class="text-white bg-dark">Números Aleatorios</th>
+                                <th class="text-white bg-dark">Diferencia entre numeros</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Aquí se mostrarán los números -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-7">
+                    <p>Límite inferior: <span id="inferiorLimitText"></span></p>
+                    <p>Límite superior: <span id="superiorLimitText"></span></p>
+                    <p>Cantidad de filas: <span id="rowsCantText"></span></p>
+                    <p>Maxima diferencia: <span id="maxDiferenceText"></span></p>
+                    <p>Promedio numeros aleatorios: <span id="promText"></span></p>
+                    <p>Fila Seleccionada: <span id="selectedRowText"></span></p>
+                    <div class="form-group pt-2">
+                        <button class="btn btn-secondary mt-4" onclick="closeTab()">Botón Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        let randomNumbers = []; // An array to store the random numbers
+        let diferenceBetweenNumbers = []; // An array to store the diference between the random numbers
+        let maxLimit = 0; // The max limit of the random numbers
+        let minLimit = 0; // The min limit of the random numbers
+        let rowsCant = 0; // The quantity of rows
+        let maxDiference = 0; // The max diference between the random numbers
+        let prom = 0; // The average of the random numbers
+        let selectedRow = 0; // The selected row
+        const RANDOM_NUMBERS_QUANTITY = 5; // The quantity of random numbers
+
+        // Function to check if the limits are correct and generate the random numbers
+        function generateNumbers(){
+            try {
+                maxLimit = parseInt(document.getElementById('superiorLimitInput').value); // Get the max limit
+                minLimit = parseInt(document.getElementById('inferiorLimitInput').value); // Get the min limit
+                if(!minLimit > 0 ) return alert('El límite inferior debe ser mayor a 0'); // If the min limit is not greater than 0, then show an alert
+                if(!maxLimit > 0 ) return alert('El límite superior debe ser mayor a 0'); // If the max limit is not greater than 0, then show an alert
+                if(maxLimit < minLimit) return alert('El límite superior debe ser mayor al límite inferior'); // If the max limit is not greater than the min limit, then show an alert
+                if((maxLimit-50) <  minLimit) return alert('El límite superior debe ser mayor al límite inferior por 50'); // If the max limit is not greater than the min limit by 50, then show an alert
+                generateRandomNumbers(); // Generate the random numbers
+                orderRandomNumbers(); // Order the random numbers
+                calculateDiferencesBetweenNumbers(); // Calculate the diference between the random numbers
+                calculateMaxDiference(); // Calculate the max diference between the random numbers
+                calculateProm(); // Calculate the average of the random numbers
+                generateTable(); // Generate the table
+                document.getElementById('inferiorLimitText').innerHTML = minLimit; // Show the min limit
+                document.getElementById('superiorLimitText').innerHTML = maxLimit; // Show the max limit
+                document.getElementById('rowsCantText').innerHTML = rowsCant; // Show the quantity of rows
+                document.getElementById('maxDiferenceText').innerHTML = maxDiference; // Show the max diference between the random numbers
+                document.getElementById('promText').innerHTML = prom; // Show the average of the random numbers
+                document.getElementById('selectedRowText').innerHTML = selectedRow; // Show the selected row
+            } catch (error) {
+                console.log(error);
+                return alert('Los límites deben ser números enteros'); // If the limits are not integers, then show an alert
+            }
+        }
+
+        // Function to generate random numbers
+        function generateRandomNumbers(){
+            randomNumbers = []; // Reset the array
+            for (let i = 0; i < RANDOM_NUMBERS_QUANTITY; i++) { // Loop to generate the random numbers
+                // Check if the random number is already in the array, and if it is, then generate another one
+                while(true){ // Loop to generate the random numbers and break it when the random number is not in the array
+                    let randomNumber = Math.floor(Math.random() * (maxLimit - minLimit + 1) + minLimit); // Generate the random number
+                    if(!randomNumbers.includes(randomNumber)){ // Check if the random number is already in the array
+                        randomNumbers.push(randomNumber); // Add the random number to the array
+                        break; // Break the loop
+                    }
+                }
+            }
+            rowsCant = randomNumbers.length; // Set the quantity of rows
+        }
+
+        // Function to order the random numbers on ascending order
+        function orderRandomNumbers(){
+            randomNumbers.sort((a, b) => a - b); // Order the random numbers on ascending order
+        }
+
+        // Function to calculate the diference between the random numbers, start from minLimit to number 1
+        function calculateDiferencesBetweenNumbers(){
+            diferenceBetweenNumbers = []; // Reset the array
+            for (let i = 0; i < RANDOM_NUMBERS_QUANTITY; i++) { // Loop to calculate the diference between the random numbers
+                if(i == 0){ // If it is the first number, then calculate the diference between the number and the minLimit
+                    diferenceBetweenNumbers.push(randomNumbers[i] - minLimit); // Calculate the diference between the number and the minLimit
+                }else{ // If it is not the first number, then calculate the diference between the current number and the previous number
+                    diferenceBetweenNumbers.push(randomNumbers[i] - randomNumbers[i-1]); // Calculate the diference between the current number and the previous number
+                }
+            }
+            
+        }
+
+        // Function to calculate the max diference between the random numbers
+        function calculateMaxDiference(){
+            maxDiference = Math.max(...diferenceBetweenNumbers); // Calculate the max diference between the random numbers
+        }
+
+        // Function to calculate the average of the random numbers
+        function calculateProm(){
+            let sum = 0; // The sum of the random numbers
+            for (let i = 0; i < RANDOM_NUMBERS_QUANTITY; i++) { // Loop to calculate the sum of the random numbers
+                sum += randomNumbers[i]; // Add the current number to the sum
+            }
+            prom = sum / RANDOM_NUMBERS_QUANTITY; // Calculate the average of the random numbers
+        }
+
+        // Function to show the random numbers on the table and the diferences
+        function generateTable(){
+            let tableBody = document.getElementById('tableBody'); // Get the table body
+            tableBody.innerHTML = ''; // Reset the table body
+            for (let i = 0; i < RANDOM_NUMBERS_QUANTITY; i++) { // Loop to show the random numbers on the table
+                let row = document.createElement('tr'); // Create a row
+                row.setAttribute('onclick', 'selectRow(this)'); // add function selectRow() to the row
+                row.setAttribute('style', 'cursor: pointer;'); // add cursor pointer to the row
+                let number = document.createElement('td'); // Create a cell for the number
+                let diference = document.createElement('td'); // Create a cell for the diference
+                number.innerHTML = randomNumbers[i]; // Add the number to the cell
+                diference.innerHTML = diferenceBetweenNumbers[i]; // Add the diference to the cell
+                row.appendChild(number); // Add the cell to the row
+                row.appendChild(diference); // Add the cell to the row
+                tableBody.appendChild(row); // Add the row to the table body
+            }
+        }
+
+        // function to select row, add bg-info class and show the selected row
+        function selectRow(element){
+            let tableBody = document.getElementById('tableBody'); // Get the table body
+            for (let i = 0; i < tableBody.rows.length; i++) { // Loop to remove the bg-primary class from all the rows
+                tableBody.rows[i].classList.remove('bg-info'); // Remove the bg-primary class from the row
+            }
+            element.classList.add('bg-info'); // Add the bg-primary class to the row
+            selectedRow = element.rowIndex; // Get the index of the selected row
+            document.getElementById('selectedRowText').innerHTML = selectedRow; // Show the selected row
+        }
+
+
+        // Function to clear all the data
+        function clearAll(){
+            document.getElementById('inferiorLimitInput').value = ''; // Clear the min limit input
+            document.getElementById('superiorLimitInput').value = ''; // Clear the max limit input
+            document.getElementById('tableBody').innerHTML = ''; // Clear the table body
+            document.getElementById('inferiorLimitText').innerHTML = ''; // Clear the min limit text
+            document.getElementById('superiorLimitText').innerHTML = ''; // Clear the max limit text
+            document.getElementById('rowsCantText').innerHTML = ''; // Clear the quantity of rows text
+            document.getElementById('maxDiferenceText').innerHTML = ''; // Clear the max diference text
+            document.getElementById('promText').innerHTML = ''; // Clear the average text
+            document.getElementById('selectedRowText').innerHTML = ''; // Clear the selected row text
+            minLimit = 0; // Reset the min limit
+            maxLimit = 0; // Reset the max limit
+            rowsCant = 0; // Reset the quantity of rows
+            maxDiference = 0; // Reset the max diference
+            prom = 0; // Reset the average
+            selectedRow = 0; // Reset the selected row
+            randomNumbers = []; // Reset the random numbers
+            diferenceBetweenNumbers = []; // Reset the diference between the random numbers
+        }
+
+        // Function to close the tab
+        function closeTab(){
+            window.close(); // Close the tab
+        }
+        
+    </script>
+</body>
+</html>
